@@ -1,0 +1,62 @@
+---
+import type { Locale, SiteCopy } from '../data/i18n';
+
+interface Props {
+  lang: Locale;
+  copy: SiteCopy['nav'];
+  path?: string;
+}
+
+const { lang, copy, path = '' } = Astro.props;
+const homePath = lang === 'tr' ? '/' : `/${lang}/`;
+const localeNames = { tr: 'TR', en: 'EN', ru: 'RU' };
+const languageHref = (code: string) => {
+  const prefix = code === 'tr' ? '/' : `/${code}/`;
+  return `${prefix}${path ? `${path.replace(/^\/+|\/+$/g, '')}/` : ''}`;
+};
+---
+
+<header class="site-header" data-header>
+  <div class="container nav-wrap">
+    <a class="brand" href={`${homePath}#top`} aria-label={copy.homeLabel}>
+      <img src="/sryyadev-logo.png" alt="sryya.dev" width="900" height="190" />
+    </a>
+
+    <button class="menu-button" type="button" aria-label={copy.menuLabel} aria-expanded="false" aria-controls="main-nav" data-menu-button>
+      <span></span><span></span>
+    </button>
+
+    <nav id="main-nav" class="main-nav" aria-label={copy.navLabel} data-menu>
+      <a href={`${homePath}#services`}>{copy.services}</a>
+      <a href={`${homePath}#approach`}>{copy.approach}</a>
+      <a href={`${homePath}#projects`}>{copy.projects}</a>
+      <a href={`${homePath}#about`}>{copy.about}</a>
+      <div class="language-switch" aria-label={copy.languageLabel}>
+        {Object.entries(localeNames).map(([code, label]) => (
+          <a href={languageHref(code)} class:list={{ active: code === lang }} lang={code}>{label}</a>
+        ))}
+      </div>
+      <a class="nav-cta" href={`${homePath}#contact`}>{copy.cta}</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector('[data-header]');
+  const button = document.querySelector('[data-menu-button]');
+  const menu = document.querySelector('[data-menu]');
+
+  const closeMenu = () => {
+    button?.setAttribute('aria-expanded', 'false');
+    menu?.classList.remove('is-open');
+  };
+
+  button?.addEventListener('click', () => {
+    const isOpen = button.getAttribute('aria-expanded') === 'true';
+    button.setAttribute('aria-expanded', String(!isOpen));
+    menu?.classList.toggle('is-open', !isOpen);
+  });
+
+  menu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+  window.addEventListener('scroll', () => header?.classList.toggle('is-scrolled', window.scrollY > 16), { passive: true });
+</script>

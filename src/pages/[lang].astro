@@ -1,0 +1,13 @@
+---
+import HomePage from '../components/HomePage.astro';
+import type { Locale } from '../data/i18n';
+
+export function getStaticPaths() {
+  return ['en', 'ru'].map((lang) => ({ params: { lang }, props: { lang } }));
+}
+
+interface Props { lang: Locale; }
+const { lang } = Astro.props;
+---
+
+<HomePage lang={lang} />

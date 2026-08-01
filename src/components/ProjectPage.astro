@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import { translations, type Locale } from '../data/i18n';
+import { getProjectDetails, projectSlugs, type ProjectSlug } from '../data/projectDetails';
+
+interface Props { lang: Locale; slug: ProjectSlug; }
+const { lang, slug } = Astro.props;
+const t = translations[lang];
+const { ui, project } = getProjectDetails(lang, slug);
+const path = `projects/${slug}`;
+const homePath = lang === 'tr' ? '/' : `/${lang}/`;
+const projectBase = lang === 'tr' ? '/projects' : `/${lang}/projects`;
+const currentIndex = projectSlugs.indexOf(slug);
+const nextSlug = projectSlugs[(currentIndex + 1) % projectSlugs.length];
+const nextProject = getProjectDetails(lang, nextSlug).project;
+const pageTitle = `${project.name} — ${project.type} | sryya.dev`;
+const showcaseImages = slug === 'bagla-app'
+  ? ['/images/projects/bagla-hero.webp']
+  : slug === 'onlymlm'
+    ? ['/images/projects/onlymlm-dashboard.webp']
+    : ['/images/projects/claryflow-screen-1.webp', '/images/projects/claryflow-screen-2.webp', '/images/projects/claryflow-screen-3.webp'];
+const showcaseAlt = {
+  tr: `${project.name} ürün ekranı`,
+  en: `${project.name} product screen`,
+  ru: `Экран продукта ${project.name}`,
+}[lang];
+---
+
+<BaseLayout title={pageTitle} description={project.summary} lang={lang} services={t.services.items} path={path}>
+  <Header lang={lang} copy={t.nav} path={path} />
+  <main class:list={['case-page', `case-${slug}`]}>
+    <section class="case-hero">
+      <div class="container">
+        <a class="case-back" href={`${homePath}#projects`}>← {ui.back}</a>
+        <div class="case-hero-grid">
+          <div class="case-title"><span>{project.type}</span><h1>{project.name}</h1><p>{project.summary}</p></div>
+          <div class="case-logo"><img src={project.logo} alt={`${project.name} logo`} width="700" height="700" /></div>
+        </div>
+      </div>
+    </section>
+
+    <section class:list={['case-showcase', { 'case-showcase-mobile': slug === 'claryflow' }]} aria-label={showcaseAlt}>
+      <div class="container showcase-frame">
+        {showcaseImages.map((image, index) => (
+          <figure>
+            <img src={image} alt={`${showcaseAlt} ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} decoding="async" />
+          </figure>
+        ))}
+      </div>
+    </section>
+
+    <section class="case-content">
+      <div class="container case-intro">
+        <div><span class="case-eyebrow">01 — {ui.overview}</span><p>{project.overview}</p></div>
+        <aside><span>{ui.audience}</span><p>{project.audience}</p></aside>
+      </div>
+      <div class="container case-content-grid">
+        <article><span>02</span><h2>{ui.challenge}</h2><p>{project.challenge}</p></article>
+        <article><span>03</span><h2>{ui.solution}</h2><p>{project.solution}</p></article>
+        <article class="case-capabilities"><span>04</span><h2>{ui.highlights}</h2><ul>{project.highlights.map((item, index) => <li><i>{String(index + 1).padStart(2, '0')}</i>{item}</li>)}</ul></article>
+      </div>
+      <div class="container case-result">
+        <span>05 — {ui.result}</span><p>{project.result}</p>
+      </div>
+      <div class="container case-tags"><span>{ui.capabilities}</span><div>{project.capabilities.map((item) => <em>{item}</em>)}</div></div>
+      <div class="container case-actions">
+        {project.url ? <a class="button button-primary" href={project.url} target="_blank" rel="noreferrer">{ui.visit} <span>↗</span></a> : <span class="case-soon">{ui.soon}</span>}
+        <a class="text-link" href={`${homePath}#contact`}>{ui.contact} <span>↗</span></a>
+      </div>
+    </section>
+
+    <section class="case-next">
+      <div class="container"><span>{ui.next}</span><a href={`${projectBase}/${nextSlug}/`}>{nextProject.name} <i>→</i></a></div>
+    </section>
+  </main>
+  <Footer lang={lang} copy={t.footer} />
+</BaseLayout>
+
+<style>
+  .case-page { background: #f4f2ed; }
+  .case-hero { padding: 140px 0 90px; background: #dbe1ff; }
+  .case-claryflow .case-hero { background: #dcf6ea; }.case-onlymlm .case-hero { background: #f5dfc8; }
+  .case-back { display: inline-block; margin-bottom: 55px; color: #697381; font-size: 13px; font-weight: 700; }
+  .case-hero-grid { display: grid; grid-template-columns: 1fr .7fr; align-items: center; gap: 80px; }
+  .case-title > span { color: #4968ff; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .case-title h1 { margin: 25px 0; font: 700 clamp(60px, 9vw, 120px)/.92 'Manrope', sans-serif; letter-spacing: -.07em; }
+  .case-title p { max-width: 650px; margin: 0; color: #263241; font-size: 20px; line-height: 1.7; }
+  .case-logo { width: min(100%, 390px); aspect-ratio: 1; padding: 20px; justify-self: end; border-radius: 42px; background: rgba(255,255,255,.45); box-shadow: 0 30px 70px rgba(7,17,31,.14); }
+  .case-logo img { width: 100%; height: 100%; border-radius: 30px; object-fit: contain; }.case-bagla-app .case-logo { padding: 0; overflow: hidden; }.case-bagla-app .case-logo img { object-fit: cover; border-radius: 42px; }
+  .case-showcase { padding: 85px 0; background: #07111f; overflow: hidden; }.showcase-frame { padding: 22px; border: 1px solid rgba(255,255,255,.14); border-radius: 30px; background: rgba(255,255,255,.06); box-shadow: 0 40px 100px rgba(0,0,0,.25); }.showcase-frame figure { margin: 0; overflow: hidden; border-radius: 18px; background: white; }.showcase-frame img { display: block; width: 100%; height: auto; }.case-showcase-mobile { padding: 100px 0; background: #d8f2e8; }.case-showcase-mobile .showcase-frame { display: grid; grid-template-columns: repeat(3, 1fr); align-items: start; gap: clamp(18px, 4vw, 55px); max-width: 1030px; padding: 0; border: 0; background: none; box-shadow: none; }.case-showcase-mobile figure { border-radius: clamp(22px, 3vw, 38px); box-shadow: 0 35px 70px rgba(7,17,31,.18); }.case-showcase-mobile figure:nth-child(2) { margin-top: 70px; }.case-showcase-mobile img { aspect-ratio: 1320/2868; object-fit: cover; }
+  .case-content { padding: 110px 0; background: white; }.case-intro { display: grid; grid-template-columns: 1.45fr .55fr; gap: 100px; margin-bottom: 100px; }.case-eyebrow,.case-intro aside > span,.case-result > span,.case-tags > span { color: #4968ff; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }.case-intro > div > p { max-width: 900px; margin: 28px 0 0; font: 600 clamp(27px, 3.4vw, 48px)/1.3 'Manrope', sans-serif; letter-spacing: -.04em; }.case-intro aside { padding-left: 30px; border-left: 1px solid rgba(7,17,31,.14); }.case-intro aside p { margin: 25px 0 0; color: #697381; font-size: 15px; line-height: 1.75; }.case-content-grid { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid rgba(7,17,31,.14); border-left: 1px solid rgba(7,17,31,.14); }
+  .case-content article { min-height: 340px; padding: 42px; border-right: 1px solid rgba(7,17,31,.14); border-bottom: 1px solid rgba(7,17,31,.14); }.case-content article > span { color: #4968ff; font-size: 12px; font-weight: 700; }
+  .case-content h2 { margin: 70px 0 18px; font: 700 32px/1.1 'Manrope', sans-serif; letter-spacing: -.04em; }.case-content p { max-width: 500px; margin: 0; color: #697381; font-size: 17px; line-height: 1.75; }
+  .case-capabilities { grid-column: span 2; }.case-capabilities ul { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 50px; margin: 35px 0 0; padding: 0; list-style: none; }.case-capabilities li { display:flex; gap:18px; padding: 20px 0; border-top: 1px solid rgba(7,17,31,.14); font-weight: 700; }.case-capabilities li i { color:#99a1aa; font:normal 11px/1.8 'Manrope',sans-serif; }.case-result { display:grid; grid-template-columns:.65fr 1.35fr; gap:60px; margin-top:100px; padding:65px; color:white; background:#07111f; border-radius:32px; }.case-result p { margin:0; font:600 clamp(25px,3vw,40px)/1.35 'Manrope',sans-serif; letter-spacing:-.035em; }.case-result > span { color:#c9ff55; }.case-tags { display:grid; grid-template-columns:.65fr 1.35fr; gap:60px; padding:70px 0 10px; }.case-tags div { display:flex; flex-wrap:wrap; gap:10px; }.case-tags em { padding:12px 17px; border:1px solid rgba(7,17,31,.14); border-radius:999px; font-size:13px; font-style:normal; font-weight:700; }
+  .case-actions { display: flex; align-items: center; gap: 35px; margin-top: 55px; }.case-soon { padding: 15px 22px; border: 1px solid rgba(7,17,31,.14); border-radius: 999px; color: #697381; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .case-next { padding: 90px 0; color: white; background: #07111f; }.case-next span { color: #c9ff55; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }.case-next a { display: flex; justify-content: space-between; margin-top: 25px; font: 700 clamp(45px, 7vw, 90px)/1 'Manrope', sans-serif; letter-spacing: -.06em; }.case-next i { color: #c9ff55; font-style: normal; }
+  @media (max-width: 760px) { .case-hero { padding: 110px 0 70px; }.case-back { margin-bottom: 35px; }.case-hero-grid { grid-template-columns: 1fr; gap: 45px; }.case-logo { width: 260px; justify-self: start; }.case-title p { font-size: 17px; }.case-showcase { padding:45px 0; }.showcase-frame { padding:9px; border-radius:17px; }.showcase-frame figure { border-radius:10px; }.case-showcase-mobile { padding:60px 0; }.case-showcase-mobile .showcase-frame { width:calc(100% - 30px); gap:12px; }.case-showcase-mobile figure { border-radius:14px; }.case-showcase-mobile figure:nth-child(2) { margin-top:32px; }.case-content { padding: 75px 0; }.case-intro { grid-template-columns:1fr; gap:45px; margin-bottom:65px; }.case-intro aside { padding:25px 0 0; border-top:1px solid rgba(7,17,31,.14); border-left:0; }.case-content-grid { grid-template-columns: 1fr; }.case-capabilities { grid-column: auto; }.case-content article { min-height: auto; padding: 30px; }.case-content h2 { margin-top: 45px; }.case-capabilities ul { grid-template-columns: 1fr; }.case-result { grid-template-columns:1fr; gap:25px; margin-top:60px; padding:35px 28px; border-radius:22px; }.case-tags { grid-template-columns:1fr; gap:25px; padding-top:55px; }.case-actions { align-items: flex-start; flex-direction: column; }.case-next { padding: 70px 0; } }
+</style>

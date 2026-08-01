@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { translations } from '../data/i18n';
+const t = translations.tr;
+---
+
+<BaseLayout title="Sayfa bulunamadı | sryya.dev" description="Aradığınız sayfa bulunamadı." lang="tr" services={t.services.items} noindex>
+  <Header lang="tr" copy={t.nav} />
+  <main class="not-found"><div><span>404</span><h1>Bu sayfa burada değil.</h1><p>Bağlantı değişmiş veya sayfa kaldırılmış olabilir.</p><a class="button button-primary" href="/">Ana sayfaya dön <b>→</b></a></div></main>
+  <Footer lang="tr" copy={t.footer} />
+</BaseLayout>
+
+<style>.not-found{min-height:82vh;padding:150px 24px 90px;display:grid;place-items:center;text-align:center;background:#f4f2ed}.not-found>div>span{color:#4968ff;font:800 14px 'Manrope',sans-serif;letter-spacing:.2em}.not-found h1{margin:20px 0;font:700 clamp(48px,8vw,90px)/1 'Manrope',sans-serif;letter-spacing:-.06em}.not-found p{margin:0 0 35px;color:#697381;font-size:18px}.not-found b{font-size:20px}</style>

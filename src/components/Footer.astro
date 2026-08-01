@@ -1,0 +1,31 @@
+---
+import type { Locale, SiteCopy } from '../data/i18n';
+
+interface Props {
+  lang: Locale;
+  copy: SiteCopy['footer'];
+}
+
+const { lang, copy } = Astro.props;
+const homePath = lang === 'tr' ? '/' : `/${lang}/`;
+---
+
+<footer class="footer">
+  <div class="container footer-grid">
+    <div>
+      <a class="brand brand-light" href={`${homePath}#top`}>
+        <img src="/sryyadev-logo.png" alt="sryya.dev" width="900" height="190" />
+      </a>
+      <p>{copy.tagline}</p>
+    </div>
+    <div class="footer-links">
+      <a href={`${homePath}#services`}>{copy.services}</a>
+      <a href={`${homePath}#projects`}>{copy.projects}</a>
+      <a href={`${homePath}#contact`}>{copy.contact}</a>
+    </div>
+    <div class="footer-meta">
+      <a href="mailto:info@sryya.dev">info@sryya.dev</a>
+      <span>© {new Date().getFullYear()} sryya.dev</span>
+    </div>
+  </div>
+</footer>

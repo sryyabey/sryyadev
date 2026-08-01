@@ -1,0 +1,14 @@
+---
+import ProjectPage from '../../../components/ProjectPage.astro';
+import { projectSlugs, type ProjectSlug } from '../../../data/projectDetails';
+import type { Locale } from '../../../data/i18n';
+
+export function getStaticPaths() {
+  return ['en', 'ru'].flatMap((lang) => projectSlugs.map((slug) => ({ params: { lang, slug }, props: { lang, slug } })));
+}
+
+interface Props { lang: Locale; slug: ProjectSlug; }
+const { lang, slug } = Astro.props;
+---
+
+<ProjectPage lang={lang} slug={slug} />
