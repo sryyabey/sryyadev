@@ -5,13 +5,15 @@ interface Props {
   lang: Locale;
   copy: SiteCopy['nav'];
   path?: string;
+  singleLanguage?: boolean;
 }
 
-const { lang, copy, path = '' } = Astro.props;
+const { lang, copy, path = '', singleLanguage = false } = Astro.props;
 const homePath = lang === 'tr' ? '/' : `/${lang}/`;
 const localeNames = { tr: 'TR', en: 'EN', ru: 'RU' };
 const languageHref = (code: string) => {
   const prefix = code === 'tr' ? '/' : `/${code}/`;
+  if (singleLanguage && code !== lang) return prefix;
   return `${prefix}${path ? `${path.replace(/^\/+|\/+$/g, '')}/` : ''}`;
 };
 ---
@@ -31,6 +33,7 @@ const languageHref = (code: string) => {
       <a href={`${homePath}#approach`}>{copy.approach}</a>
       <a href={`${homePath}#projects`}>{copy.projects}</a>
       <a href={`${homePath}#about`}>{copy.about}</a>
+      <a href={`${homePath}blog/`}>{copy.blog}</a>
       <div class="language-switch" aria-label={copy.languageLabel}>
         {Object.entries(localeNames).map(([code, label]) => (
           <a href={languageHref(code)} class:list={{ active: code === lang }} lang={code}>{label}</a>

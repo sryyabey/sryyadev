@@ -1,0 +1,36 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { translations } from '../../data/i18n';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => data.language === 'tr' && !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+interface Props { post: CollectionEntry<'blog'>; }
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const t = translations.tr;
+const published = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(post.data.date);
+const toc = headings.filter((heading) => heading.depth === 2 && heading.text !== 'İçindekiler');
+---
+
+<BaseLayout title={`${post.data.title} | sryya.dev`} description={post.data.description} lang="tr" services={t.services.items} path={`blog/${post.id}`} article={{ publishedTime: post.data.date.toISOString(), modifiedTime: post.data.updated?.toISOString(), keywords: post.data.keywords, faq: post.data.faq }}>
+  <Header lang="tr" copy={t.nav} path={`blog/${post.id}`} />
+  <main class="article-page">
+    <header class="article-hero"><div class="container article-hero-inner"><a href="/blog/">← Tüm yazılar</a><div class="article-meta"><span>{post.data.category}</span><time datetime={post.data.date.toISOString()}>{published}</time><span>{post.data.readingTime}</span></div><h1>{post.data.title}</h1><p>{post.data.description}</p></div></header>
+    <div class="container article-layout">
+      <aside class="article-toc"><span>İçindekiler</span><nav>{toc.map((heading) => <a href={`#${heading.slug}`}>{heading.text}</a>)}</nav></aside>
+      <article class="article-body"><Content /></article>
+    </div>
+    <section class="article-cta"><div class="container"><span>Bir SaaS fikriniz mi var?</span><h2>Fikri birlikte çalışan<br />bir ürüne dönüştürelim.</h2><a href="/#contact">Projenizi konuşalım ↗</a></div></section>
+  </main>
+  <Footer lang="tr" copy={t.footer} />
+</BaseLayout>
+
+<style is:global>
+  .article-page{background:white}.article-hero{padding:155px 0 100px;background:#dbe1ff}.article-hero-inner>a{display:inline-block;margin-bottom:55px;color:#657182;font-size:13px;font-weight:700}.article-meta{display:flex;gap:20px;color:#657182;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.article-meta span:first-child{color:#4968ff}.article-hero h1{max-width:1050px;margin:28px 0;font-size:clamp(45px,7vw,88px);line-height:1.03}.article-hero p{max-width:780px;margin:0;color:#344151;font-size:20px;line-height:1.7}.article-layout{display:grid;grid-template-columns:260px minmax(0,760px);justify-content:space-between;gap:80px;padding-top:100px;padding-bottom:120px}.article-toc{position:sticky;top:110px;align-self:start;padding-right:30px;border-right:1px solid rgba(7,17,31,.14)}.article-toc>span{color:#4968ff;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.article-toc nav{display:flex;margin-top:24px;flex-direction:column;gap:14px}.article-toc a{color:#697381;font-size:12px;line-height:1.45}.article-toc a:hover{color:#4968ff}.article-body{min-width:0;color:#263241;font-size:17px;line-height:1.82}.article-body>h1,.article-body>h2:first-of-type{display:none}.article-body h2{margin:75px 0 22px;color:#07111f;font-size:34px;line-height:1.2;scroll-margin-top:110px}.article-body h3{margin:45px 0 16px;color:#07111f;font-size:24px;scroll-margin-top:110px}.article-body p{margin:0 0 25px}.article-body a{color:#4968ff;text-decoration:underline;text-underline-offset:3px}.article-body strong{color:#07111f}.article-body ul,.article-body ol{margin:0 0 30px;padding-left:24px}.article-body li{margin:10px 0;padding-left:5px}.article-body table{width:100%;margin:35px 0;border-collapse:collapse;font-size:14px}.article-body th,.article-body td{padding:16px;border:1px solid rgba(7,17,31,.14);text-align:left;vertical-align:top}.article-body th{color:white;background:#07111f}.article-body blockquote{margin:40px 0;padding:28px 30px;border-left:4px solid #4968ff;background:#f4f2ed}.article-cta{padding:100px 0;color:white;background:#4968ff}.article-cta span{color:#c9ff55;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.article-cta h2{margin:20px 0 35px;font-size:clamp(42px,6vw,75px)}.article-cta a{display:inline-block;padding:16px 22px;border-radius:999px;color:#07111f;background:#c9ff55;font-weight:800}@media(max-width:850px){.article-layout{grid-template-columns:1fr;gap:55px}.article-toc{position:static;padding:25px;border:1px solid rgba(7,17,31,.14);border-radius:18px}.article-toc nav{display:grid;grid-template-columns:repeat(2,1fr)}}@media(max-width:640px){.article-hero{padding:120px 0 70px}.article-hero-inner>a{margin-bottom:38px}.article-meta{flex-wrap:wrap;gap:8px 14px}.article-hero p{font-size:17px}.article-layout{padding-top:60px;padding-bottom:80px}.article-toc nav{grid-template-columns:1fr}.article-body{font-size:16px}.article-body h2{margin-top:58px;font-size:28px}.article-body table{display:block;overflow-x:auto}.article-cta{padding:75px 0}}
+</style>

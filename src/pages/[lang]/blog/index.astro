@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import { translations, type Locale } from '../../../data/i18n';
+
+export function getStaticPaths() { return [{ params: { lang: 'en' } }, { params: { lang: 'ru' } }]; }
+const lang = Astro.params.lang as Exclude<Locale, 'tr'>;
+const t = translations[lang];
+const copy = {
+  en: { title: 'Blog — SaaS, Product & Software Guides | sryya.dev', description: 'Practical guides on SaaS development, MVP planning, product design and software technology.', eyebrow: '06 / BLOG', heading: 'Practical thinking for', accent: 'building better products.', intro: 'Experience-based guides on SaaS, MVPs, product design and software development.', read: 'Read article' },
+  ru: { title: 'Блог — SaaS, продукты и разработка | sryya.dev', description: 'Практические материалы о SaaS, планировании MVP, дизайне продуктов и разработке ПО.', eyebrow: '06 / БЛОГ', heading: 'Практические знания для', accent: 'сильных продуктов.', intro: 'Материалы о SaaS, MVP, продуктовом дизайне и разработке на основе реального опыта.', read: 'Читать статью' },
+}[lang];
+const posts = (await getCollection('blog', ({ data }) => data.language === lang && !data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const dateFormat = new Intl.DateTimeFormat(lang === 'en' ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+const slugFor = (id: string) => id.split('/').pop();
+---
+
+<BaseLayout title={copy.title} description={copy.description} lang={lang} services={t.services.items} path="blog">
+  <Header lang={lang} copy={t.nav} path="blog" />
+  <main class="blog-index">
+    <section class="blog-index-hero"><div class="container"><span>{copy.eyebrow}</span><h1>{copy.heading}<br /><em>{copy.accent}</em></h1><p>{copy.intro}</p></div></section>
+    <section class="blog-list section"><div class="container">
+      {posts.map((post, index) => { const slug = slugFor(post.id); return (
+        <article class="blog-card"><div class="blog-card-no">{String(index + 1).padStart(2, '0')}</div><div><div class="blog-meta"><span>{post.data.category}</span><time datetime={post.data.date.toISOString()}>{dateFormat.format(post.data.date)}</time><span>{post.data.readingTime}</span></div><h2><a href={`/${lang}/blog/${slug}/`}>{post.data.title}</a></h2><p>{post.data.description}</p></div><a class="blog-arrow" href={`/${lang}/blog/${slug}/`} aria-label={`${copy.read}: ${post.data.title}`}>↗</a></article>
+      ); })}
+    </div></section>
+  </main>
+  <Footer lang={lang} copy={t.footer} />
+</BaseLayout>
+
+<style>
+  .blog-index{background:#f4f2ed}.blog-index-hero{padding:165px 0 105px;background:#dbe1ff}.blog-index-hero span{color:#4968ff;font-size:11px;font-weight:800;letter-spacing:.12em}.blog-index-hero h1{margin:25px 0;font-size:clamp(52px,7vw,95px);line-height:.98}.blog-index-hero h1 em{color:#4968ff;font-style:normal}.blog-index-hero p{max-width:650px;color:#4f5a68;font-size:19px;line-height:1.7}.blog-list{background:white}.blog-card{display:grid;grid-template-columns:70px 1fr 60px;gap:30px;padding:48px 0;border-top:1px solid rgba(7,17,31,.14)}.blog-card:last-child{border-bottom:1px solid rgba(7,17,31,.14)}.blog-card-no{color:#9aa1aa;font:700 12px 'Manrope',sans-serif}.blog-meta{display:flex;gap:18px;color:#697381;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.blog-meta span:first-child{color:#4968ff}.blog-card h2{max-width:850px;margin:20px 0 14px;font-size:clamp(27px,3.5vw,46px);line-height:1.12}.blog-card p{max-width:760px;margin:0;color:#697381;line-height:1.7}.blog-arrow{display:grid;place-items:center;width:52px;height:52px;border:1px solid rgba(7,17,31,.14);border-radius:50%;font-size:20px}.blog-arrow:hover{color:white;background:#07111f}@media(max-width:640px){.blog-index-hero{padding:125px 0 75px}.blog-card{grid-template-columns:1fr auto;gap:20px}.blog-card-no{display:none}.blog-meta{flex-wrap:wrap;gap:8px 14px}.blog-arrow{width:44px;height:44px}.blog-card p{grid-column:1/-1}}
+</style>
